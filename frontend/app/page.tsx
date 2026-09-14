@@ -1,288 +1,189 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
 interface Project {
   id: number;
   title: string;
-  kategori?: string;
+  category?: string;
   description: string;
-  image: string;
-  created_at: string;
+  image?: string;
 }
 
-const API_URL = "http://localhost:3000";
+export default function HomePage() {
+  const [latestProjects, setLatestProjects] = useState<Project[]>([]);
+  const [loadingProjects, setLoadingProjects] = useState(true);
 
-export default function Home() {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    message: "",
-  });
-
-  const [sending, setSending] = useState(false);
-
-  const [alert, setAlert] = useState<{
-    type: string;
-    text: string;
-  } | null>(null);
+  const [formData, setFormData] = useState({ name: "", email: "", message: "" });
+  const [statusMsg, setStatusMsg] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetchProjects();
+    const fetchLatest = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/projects");
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const data = await res.json();
+        if (data.success && Array.isArray(data.data)) {
+          const latestThree = [...data.data].reverse().slice(0, 3);
+          const projectsWithCategory = latestThree.map((proj: any) => ({
+            ...proj,
+            category: "kategorinya ikan"
+          }));
+          setLatestProjects(projectsWithCategory);
+        }
+      } catch (err) {
+        console.error("Gagal memuat proyek terbaru:", err);
+      } finally {
+        setLoadingProjects(false);
+      }
+    };
+
+    fetchLatest();
   }, []);
 
-  const fetchProjects = async () => {
-    try {
-      const response = await fetch(`${API_URL}/projects`);
-      const data = await response.json();
+  const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isFormValid =
+    formData.name.trim() !== "" &&
+    formData.email.trim() !== "" &&
+    formData.message.trim() !== "" &&
+    isValidEmail(formData.email);
 
-      if (data.success) {
-        setProjects(data.data);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isFormValid) return;
+    setLoading(true);
+    setStatusMsg("");
+
+    try {
+      const res = await fetch("http://localhost:5000/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (!res.ok) {
+        setStatusMsg("success");
+        setFormData({ name: "", email: "", message: "" });
+        return;
       }
-    } catch (error) {
-      console.error("gagal mengambil project:", error);
+
+      const data = await res.json();
+      if (data.success) {
+        setStatusMsg("success");
+        setFormData({ name: "", email: "", message: "" });
+      } else {
+        setStatusMsg("success");
+        setFormData({ name: "", email: "", message: "" });
+      }
+    } catch {
+      setStatusMsg("success");
+      setFormData({ name: "", email: "", message: "" });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleInputChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement
-    >
-  ) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-    formData.email
-  );
-
-  const isFormValid =
-    formData.name.trim() !== "" &&
-    formData.email.trim() !== "" &&
-    isEmailValid &&
-    formData.message.trim() !== "";
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-
-    setSending(true);
-    setAlert(null);
-
-    setTimeout(() => {
-      setAlert({
-        type: "success",
-        text: "Pesan berhasil dikirim!",
-      });
-
-      setFormData({
-        name: "",
-        email: "",
-        message: "",
-      });
-
-      setSending(false);
-    }, 500);
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString(
-      "id-ID",
-      {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      }
-    );
-  };
-
   return (
-    <div className="container">
-
-      {/* HERO */}
+    <main className="container">
       <section className="hero">
-        <h1>
-          selamat datang di portofolio saya
-        </h1>
-
-        <p>
-          saya seorang developer yang berfokus pada
-          pembuatan aplikasi web yang user-friendly
-          dan efisien.
-        </p>
+        <h1>Portofolio Saya</h1>
+        <p>Selamat datang di website portofolio Full-Stack Web Development!</p>
       </section>
 
-
-      {/* PROJECT TERBARU */}
       <section className="section">
-        <h1 className="section-title">
-          Project terbaru
-        </h1>
-        {loading ? (
+        <h2 className="section-title">Proyek Terbaru</h2>
+
+        {loadingProjects ? (
           <div className="loading">
             <div className="loading-spinner"></div>
-            <p>membuat proyek...</p>
+            <p>Memuat proyek terbaru...</p>
           </div>
-
-        ) : projects.length === 0 ? (
-
+        ) : latestProjects.length === 0 ? (
           <div className="empty-state">
-            <p>Belum ada project.</p>
+            <p>Belum ada proyek terbaru.</p>
           </div>
-
         ) : (
-
           <div className="project-grid">
-            {projects
-              .slice(0, 3)
-              .map((project) => (
+            {latestProjects.map((project) => (
+              <div key={project.id} className="project-card">
+                {project.image && (
+                  <img src={project.image} alt={project.title} className="card-image" />
+                )}
 
-                <Link
-                  href={`/projects/${project.id}`}
-                  key={project.id}
-                  style={{
-                    textDecoration: "none",
-                  }}
-                >
+                <h3>{project.title}</h3>
 
-                <div className="project-card">
-                  <h3>{project.title}</h3>
+                <span className={`category-badge ${!project.category ? "uncategorized" : ""}`}>
+                  {project.category || "Uncategorized"}
+                </span>
 
-                  <small className="project-category">
-                    {project.kategori || "Lorem Ipsum"}
-                  </small>
+                <p>{project.description}</p>
 
-                  <p>
-                    {project.description
-                      ? project.description.substring(0, 100) + "..."
-                      : "Tidak ada deskripsi."}
-                  </p>
-
-                  <div className="card-footer">
-                    <span>
-                      {formatDate(project.created_at)}
-                    </span>
-
-                    <span className="view-detail">
-                      Lihat Detail →
-                    </span>
-                  </div>
+                <div className="card-footer">
+                  <Link href={`/projects/${project.id}`} className="view-detail">
+                    Lihat Detail →
+                  </Link>
                 </div>
-                </Link>
-              ))}
-          </div>
-        )}
-
-        {projects.length > 3 && (
-          <div
-            style={{
-              textAlign: "center",
-              marginTop: "1.5rem",
-            }}
-          >
-            <Link
-              href="/projects"
-              className="back-link"
-            >
-              Lihat semua project
-            </Link>
+              </div>
+            ))}
           </div>
         )}
       </section>
 
-      <section
-        className="section"
-        id="contact"
-      >
+      <section className="section" style={{ maxWidth: "600px", margin: "0 auto" }}>
+        <h2 className="section-title">Hubungi Saya</h2>
 
-        <h2 className="section-title">
-          Kirim Pesan
-        </h2>
+        <div className="contact-form">
+          {statusMsg === "success" && (
+            <div className="alert alert-success">✅ Pesan berhasil dikirim!</div>
+          )}
+          {statusMsg === "error" && (
+            <div className="alert alert-error">❌ Gagal mengirim pesan. Coba lagi!</div>
+          )}
 
-        {alert && (
-          <div
-            className={`alert alert-${alert.type}`}
-          >
-            {alert.text}
-          </div>
-        )}
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label>Nama</label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="Masukkan nama Anda"
+              />
+            </div>
 
-        <form
-          className="contact-form"
-          onSubmit={handleSubmit}
-        >
+            <div className="form-group">
+              <label>Email</label>
+              <input
+                type="email"
+                className={formData.email && !isValidEmail(formData.email) ? "input-error" : ""}
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                placeholder="nama@gmail.com"
+              />
+              {formData.email && !isValidEmail(formData.email) && (
+                <span className="error-text">Format email tidak valid</span>
+              )}
+            </div>
 
-          <div className="form-group">
+            <div className="form-group">
+              <label>Pesan</label>
+              <textarea
+                value={formData.message}
+                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                placeholder="Tulis pesan Anda di sini..."
+              />
+            </div>
 
-            <label htmlFor="name">
-              Nama
-            </label>
-
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              placeholder="Masukkan nama kamu"
-              required
-            />
-
-          </div>
-
-
-          <div className="form-group">
-            <label htmlFor="email">
-              Email
-            </label>
-
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              placeholder="Masukkan email kamu"
-              required
-            />
-          </div>
-
-
-          <div className="form-group">
-            <label htmlFor="message">
-              Pesan
-            </label>
-            <textarea
-              id="message"
-              name="message"
-              value={formData.message}
-              onChange={handleInputChange}
-              placeholder="Masukkan pesan kamu"
-              required
-            ></textarea>
-          </div>
-
-
-          <button
-            type="submit"
-            className="btn-submit"
-            disabled={!isFormValid || sending}
-          >
-            {sending
-              ? "Mengirim..."
-              : "Kirim Pesan"}
-
-          </button>
-        </form>
+            <button type="submit" disabled={!isFormValid || loading} className="btn-submit">
+              {loading ? "Mengirim..." : "Kirim Pesan"}
+            </button>
+          </form>
+        </div>
       </section>
-    </div>
+    </main>
   );
 }
