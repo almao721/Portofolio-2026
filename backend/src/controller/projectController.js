@@ -16,7 +16,7 @@ const fetchLaragonDatabases = (callback) => {
       id: index + 1,
       title: dbName,
       category: "MySQL Database",
-      description: `Project database: ${dbName} yang tersimpan di Laragon local server.`,
+      description: `${dbName} yang tersimpan`,
     }));
 
     callback(null, listDatabases);
