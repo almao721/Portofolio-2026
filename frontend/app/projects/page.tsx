@@ -11,7 +11,7 @@ interface Project {
   created_at: string;
 }
 
-const API_URL = "http://localhost:5000";
+const API_URL = "http://localhost:3000";
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -77,7 +77,6 @@ export default function ProjectsPage() {
                 <div className="project-card">
                   <h3>{project.title}</h3>
                   
-                  {/* Badge Kategori */}
                   <div style={{ marginBottom: "0.75rem" }}>
                     <span 
                       style={{

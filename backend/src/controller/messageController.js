@@ -3,7 +3,6 @@ const db = require("../config/db");
 const createMessage = (req, res) => {
   const { name, email, message } = req.body;
 
-  // Validasi field wajib
   if (!name || !email || !message) {
     return res.status(400).json({
       success: false,
@@ -11,7 +10,6 @@ const createMessage = (req, res) => {
     });
   }
 
-  // Validasi format email sederhana
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     return res.status(400).json({
@@ -20,7 +18,6 @@ const createMessage = (req, res) => {
     });
   }
 
-  // Query menyimpan pesan
   const query = `
     INSERT INTO messages (name, email, message)
     VALUES (?, ?, ?)
@@ -28,7 +25,6 @@ const createMessage = (req, res) => {
 
   db.query(query, [name, email, message], (err, result) => {
     if (err) {
-      // Fallback jika nama kolom di tabel database bernama 'messages' (paka s)
       if (err.code === "ER_BAD_FIELD_ERROR") {
         const fallbackQuery = `
           INSERT INTO messages (name, email, messages)
@@ -44,13 +40,12 @@ const createMessage = (req, res) => {
           }
           return res.status(201).json({
             success: true,
-            message: "Pesan berhasil dikirim!",
+            message: "Berhasil menyimpan pesan",
             data: {
               id: result2.insertId,
               name,
               email,
               message,
-              created_at: new Date().toISOString(),
             },
           });
         });
@@ -65,13 +60,12 @@ const createMessage = (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: "Pesan berhasil dikirim!",
+      message: "berhasil menyimpan pesan",
       data: {
         id: result.insertId,
         name,
         email,
         message,
-        created_at: new Date().toISOString(),
       },
     });
   });

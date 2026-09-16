@@ -7,13 +7,12 @@ import Link from "next/link";
 interface Project {
   id: number;
   title: string;
-  category?: string; // Ditambahkan agar mendukung properti kategori
+  category?: string;
   description: string;
-  image?: string;
   created_at: string;
 }
 
-const API_URL = "http://localhost:5000";
+const API_URL = "http://localhost:3000";
 
 export default function ProjectDetailPage() {
   const params = useParams();
@@ -33,7 +32,6 @@ export default function ProjectDetailPage() {
       const data = await response.json();
 
       if (data.success && data.data) {
-        // Paksa kategori bernilai "kategorinya ikan"
         setProject({
           ...data.data,
           category: "kategorinya ikan"
@@ -41,7 +39,6 @@ export default function ProjectDetailPage() {
       } else if (!data.success && data.message) {
         setError(data.message);
       } else {
-        // Fallback jika response langsung berupa objek project
         setProject({
           ...data,
           category: "kategorinya ikan"
@@ -94,14 +91,6 @@ export default function ProjectDetailPage() {
       </Link>
       {project && (
         <article className="project-detail">
-          {project.image && (
-            <img
-              src={project.image}
-              alt={project.title}
-              className="card-image"
-              style={{ width: "100%", maxHeight: "350px", objectFit: "cover", borderRadius: "8px", marginBottom: "1.5rem" }}
-            />
-          )}
           <h1>{project.title}</h1>
           <div style={{ marginBottom: "1rem" }}>
             <span className="category-badge">

@@ -1,10 +1,30 @@
 const db = require("../config/db");
 
-// GET /projects - Ambil semua daftar database dari Laragon
-const getAllProjects = (req, res) => {
-  const query = "SHOW DATABASES";
+const systemDbs = ["information_schema", "mysql", "performance_schema", "sys"];
 
-  db.query(query, (err, results) => {
+const fetchLaragonDatabases = (callback) => {
+  db.query("SHOW DATABASES", (err, results) => {
+    if (err) return callback(err, null);
+
+    const rawDatabases = results
+      .map((row) => row.Database)
+      .filter((dbName) => !systemDbs.includes(dbName));
+
+    const reversedDatabases = rawDatabases.reverse();
+
+    const listDatabases = reversedDatabases.map((dbName, index) => ({
+      id: index + 1,
+      title: dbName,
+      category: "MySQL Database",
+      description: `Project database: ${dbName} yang tersimpan di Laragon local server.`,
+    }));
+
+    callback(null, listDatabases);
+  });
+};
+
+const getAllProjects = (req, res) => {
+  fetchLaragonDatabases((err, listDatabases) => {
     if (err) {
       return res.status(500).json({
         success: false,
@@ -12,20 +32,6 @@ const getAllProjects = (req, res) => {
         error: err.message,
       });
     }
-
-    // Filter database sistem bawaan MySQL agar tidak ikut tampil
-    const systemDbs = ["information_schema", "mysql", "performance_schema", "sys"];
-
-    const listDatabases = results
-      .map((row) => row.Database)
-      .filter((dbName) => !systemDbs.includes(dbName))
-      .map((dbName, index) => ({
-        id: index + 1,
-        title: dbName,
-        category: "MySQL Database",
-        description: `Project database: ${dbName} yang tersimpan di Laragon local server.`,
-        created_at: new Date().toISOString(),
-      }));
 
     res.status(200).json({
       success: true,
@@ -35,14 +41,11 @@ const getAllProjects = (req, res) => {
   });
 };
 
-// GET /projects/:id - Ambil detail proyek (database) berdasarkan ID
 const getProjectById = (req, res) => {
   const { id } = req.params;
   const targetId = Number(id);
 
-  const query = "SHOW DATABASES";
-
-  db.query(query, (err, results) => {
+  fetchLaragonDatabases((err, listDatabases) => {
     if (err) {
       return res.status(500).json({
         success: false,
@@ -50,18 +53,6 @@ const getProjectById = (req, res) => {
         error: err.message,
       });
     }
-
-    const systemDbs = ["information_schema", "mysql", "performance_schema", "sys"];
-    const listDatabases = results
-      .map((row) => row.Database)
-      .filter((dbName) => !systemDbs.includes(dbName))
-      .map((dbName, index) => ({
-        id: index + 1,
-        title: dbName,
-        category: "MySQL Database",
-        description: `Project database: ${dbName} yang tersimpan di Laragon local server.`,
-        created_at: new Date().toISOString(),
-      }));
 
     const foundProject = listDatabases.find((item) => item.id === targetId);
 
@@ -80,7 +71,6 @@ const getProjectById = (req, res) => {
   });
 };
 
-// POST /projects - Tambah database baru ke Laragon
 const createProject = (req, res) => {
   const { title } = req.body;
 
@@ -91,7 +81,6 @@ const createProject = (req, res) => {
     });
   }
 
-  // Sanitasi sederhana agar nama database aman dari spasi
   const dbName = title.trim().replace(/\s+/g, "_");
   const query = `CREATE DATABASE \`${dbName}\``;
 
@@ -111,13 +100,11 @@ const createProject = (req, res) => {
         title: dbName,
         category: "MySQL Database",
         description: `Project database: ${dbName} yang tersimpan di Laragon local server.`,
-        created_at: new Date().toISOString(),
       },
     });
   });
 };
 
-// PUT /projects/:id - Stub untuk update
 const updateProject = (req, res) => {
   res.status(400).json({
     success: false,
@@ -125,12 +112,11 @@ const updateProject = (req, res) => {
   });
 };
 
-// DELETE /projects/:id - Hapus database dari Laragon
 const deleteProject = (req, res) => {
   const { id } = req.params;
   const targetId = Number(id);
 
-  db.query("SHOW DATABASES", (err, results) => {
+  fetchLaragonDatabases((err, listDatabases) => {
     if (err) {
       return res.status(500).json({
         success: false,
@@ -138,15 +124,6 @@ const deleteProject = (req, res) => {
         error: err.message,
       });
     }
-
-    const systemDbs = ["information_schema", "mysql", "performance_schema", "sys"];
-    const listDatabases = results
-      .map((row) => row.Database)
-      .filter((dbName) => !systemDbs.includes(dbName))
-      .map((dbName, index) => ({
-        id: index + 1,
-        title: dbName,
-      }));
 
     const found = listDatabases.find((item) => item.id === targetId);
 
@@ -182,7 +159,6 @@ module.exports = {
   updateProject,
   deleteProject,
 };
-
 
 // const db = require("../config/db");
 

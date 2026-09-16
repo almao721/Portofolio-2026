@@ -8,7 +8,6 @@ interface Project {
   title: string;
   category?: string;
   description: string;
-  image?: string;
 }
 
 export default function HomePage() {
@@ -22,14 +21,20 @@ export default function HomePage() {
   useEffect(() => {
     const fetchLatest = async () => {
       try {
-        const res = await fetch("http://localhost:5000/projects");
+        const res = await fetch("http://localhost:3000/projects");
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
         }
         const data = await res.json();
         if (data.success && Array.isArray(data.data)) {
-          const latestThree = [...data.data].reverse().slice(0, 3);
-          const projectsWithCategory = latestThree.map((proj: any) => ({
+          const sorted = [...data.data].reverse();
+          
+          const targetOrder: Project[] = [];
+          if (sorted.length > 1) targetOrder.push(sorted[1]);
+          if (sorted.length > 0) targetOrder.push(sorted[0]);
+          if (sorted.length > 2) targetOrder.push(sorted[2]);
+
+          const projectsWithCategory = targetOrder.map((proj: any) => ({
             ...proj,
             category: "kategorinya ikan"
           }));
@@ -59,29 +64,21 @@ export default function HomePage() {
     setStatusMsg("");
 
     try {
-      const res = await fetch("http://localhost:5000/contact", {
+      const res = await fetch("http://localhost:3000/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-
-      if (!res.ok) {
-        setStatusMsg("success");
-        setFormData({ name: "", email: "", message: "" });
-        return;
-      }
 
       const data = await res.json();
       if (data.success) {
         setStatusMsg("success");
         setFormData({ name: "", email: "", message: "" });
       } else {
-        setStatusMsg("success");
-        setFormData({ name: "", email: "", message: "" });
+        setStatusMsg("error");
       }
     } catch {
-      setStatusMsg("success");
-      setFormData({ name: "", email: "", message: "" });
+      setStatusMsg("error");
     } finally {
       setLoading(false);
     }
@@ -110,10 +107,6 @@ export default function HomePage() {
           <div className="project-grid">
             {latestProjects.map((project) => (
               <div key={project.id} className="project-card">
-                {project.image && (
-                  <img src={project.image} alt={project.title} className="card-image" />
-                )}
-
                 <h3>{project.title}</h3>
 
                 <span className={`category-badge ${!project.category ? "uncategorized" : ""}`}>
@@ -134,7 +127,7 @@ export default function HomePage() {
       </section>
 
       <section className="section" style={{ maxWidth: "600px", margin: "0 auto" }}>
-        <h2 className="section-title">Hubungi Saya</h2>
+        <h2 className="section-title" id="contact">Hubungi Saya</h2>
 
         <div className="contact-form">
           {statusMsg === "success" && (
@@ -164,9 +157,6 @@ export default function HomePage() {
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 placeholder="nama@gmail.com"
               />
-              {formData.email && !isValidEmail(formData.email) && (
-                <span className="error-text">Format email tidak valid</span>
-              )}
             </div>
 
             <div className="form-group">

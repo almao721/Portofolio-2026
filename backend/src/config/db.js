@@ -4,14 +4,15 @@ const db = mysql.createConnection({
   host: "localhost",
   user: "root",
   password: "",
+  database: "portofolio"
 });
 
 db.connect((err) => {
   if (err) {
     console.error("Koneksi MySQL gagal:", err.message);
-  } else {
-    console.log("Terhubung ke MySQL Laragon!");
+    return;
   }
+  console.log("Terhubung ke MySQL Laragon!");
 });
 
 module.exports = db;

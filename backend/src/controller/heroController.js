@@ -1,6 +1,5 @@
 const db = require("../config/db");
 
-// GET /hero - Ambil data hero section
 const getHero = (req, res) => {
   const query = "SELECT * FROM hero LIMIT 1";
 
@@ -13,7 +12,6 @@ const getHero = (req, res) => {
       });
     }
 
-    // Jika tabel hero masih kosong di database, kirim data fallback ini
     if (results.length === 0) {
       return res.status(200).json({
         success: true,
