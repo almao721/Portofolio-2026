@@ -1,7 +1,6 @@
 const router = require('express').Router();
 const db = require('../config/database');
 
-// GET SEMUA TESTIMONI (UNTUK ADMIN)
 router.get('/', async (req, res) => {
   try {
     const [testimonials] = await db.execute(
@@ -14,7 +13,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET TESTIMONI YANG APPROVED (UNTUK HALAMAN UTAMA / PUBLIC)
 router.get('/approved', async (req, res) => {
   try {
     const [testimonials] = await db.execute(
@@ -27,7 +25,7 @@ router.get('/approved', async (req, res) => {
   }
 });
 
-// KIRIM TESTIMONI BARU (PUBLIC)
+// KIRIM TESTIMONI BARU 
 router.post('/', async (req, res) => {
   try {
     const { name, message } = req.body;

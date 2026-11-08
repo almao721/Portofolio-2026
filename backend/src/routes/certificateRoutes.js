@@ -3,7 +3,7 @@ const db = require('../config/database');
 
 const router = express.Router();
 
-// GET SEMUA CERTIFICATE (PUBLIC)
+// CERTIFICATE (PUBLIC)
 router.get('/', async (req, res) => {
   try {
     const [certificates] = await db.execute('SELECT * FROM certificates ORDER BY id DESC');

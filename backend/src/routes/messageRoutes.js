@@ -1,8 +1,6 @@
 const express = require('express');
 const db = require('../config/database');
 const router = express.Router();
-
-// GET SEMUA PESAN (ADMIN)
 router.get('/', async (req, res) => {
   try {
     const [messages] = await db.execute('SELECT * FROM messages ORDER BY id DESC');
@@ -13,7 +11,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// KIRIM PESAN (PUBLIC / FORM KONTAK)
 router.post('/', async (req, res) => {
   try {
     const { name, email, phone, message } = req.body;
@@ -34,7 +31,6 @@ router.post('/', async (req, res) => {
   }
 });
 
-// HAPUS PESAN (ADMIN)
 router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;

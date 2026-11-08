@@ -64,7 +64,6 @@ require('dotenv').config();
 
 const db = require('./config/database');
 
-// Import Routes
 const authRoutes = require('./routes/authRoutes');
 const projectRoutes = require('./routes/projectRoutes');
 const certificateRoutes = require('./routes/certificateRoutes');
@@ -73,21 +72,16 @@ const testimonialRoutes = require('./routes/testimonialsRoutes');
 
 const app = express();
 
-// Middleware CORS
 app.use(cors({
   origin: ['http://localhost:3000', 'http://localhost:3001'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true,
 }));
 
-// Set limit payload jadi 500mb agar tidak kena error PayloadTooLargeError
 app.use(express.json({ limit: '500mb' }));
 app.use(express.urlencoded({ limit: '500mb', extended: true }));
-
-// Folder upload gambar
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// Halaman utama backend
 app.get('/', (req, res) => {
   res.json({
     success: true,
@@ -115,14 +109,11 @@ app.get('/test-db', async (req, res) => {
   }
 });
 
-// Daftarkan Routes ke Express
 app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/certificates', certificateRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/testimonials', testimonialRoutes);
-
-// Jalankan server
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {

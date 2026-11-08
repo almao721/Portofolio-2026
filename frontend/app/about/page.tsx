@@ -43,8 +43,6 @@ export default function AboutPage() {
 
   return (
     <main className="relative min-h-screen w-full overflow-hidden bg-[#ffffdf] flex flex-col">
-
-      {/* BACKGROUND PNG DECORATION */}
       <div className="absolute inset-0 pointer-events-none z-0">
 
         <Image
@@ -65,27 +63,20 @@ export default function AboutPage() {
 
       </div>
 
-      {/* NAVBAR FIXED TOP */}
+      {/* NAVBAR*/}
       <div className="fixed top-0 left-0 w-full px-5 sm:px-10 z-50">
         <div className="w-full max-w-6xl mx-auto">
           <Navbar />
         </div>
       </div>
 
-      {/* MAIN CONTENT */}
       <section
         ref={contentRef}
         className="relative z-10 flex-1 w-full max-w-[1280px] mx-auto px-5 sm:px-8 flex flex-col justify-center pt-32 pb-32"
       >
-
         <div className="flex flex-col lg:flex-row items-center lg:items-center justify-center gap-8 lg:gap-7">
-
-          {/* PROFILE CARD */}
           <div className="about-popup relative w-full max-w-[412px] shrink-0">
-
             <div className="w-full border border-black rounded-[25px] p-5 bg-white/20 backdrop-blur-sm">
-
-              {/* PROFILE IMAGE */}
               <div className="relative w-full aspect-square rounded-[35px] overflow-hidden bg-black">
 
                 <Image
@@ -240,12 +231,8 @@ export default function AboutPage() {
             <FaWhatsapp className="shrink-0" />
             <span>(+62)811-466-604</span>
           </a>
-
         </div>
-
       </footer>
-
-      {/* ABOUT PAGE POPUP ANIMATION */}
       <style jsx global>{`
         .about-popup {
           opacity: 0;
@@ -279,7 +266,6 @@ export default function AboutPage() {
           }
         }
       `}</style>
-
     </main>
   );
 }
