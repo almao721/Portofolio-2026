@@ -1,3 +1,4 @@
+
 import type { Metadata } from "next";
 import "./globals.css";
 
@@ -15,13 +16,23 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link 
-          href="https://fonts.googleapis.com/css2?family=Carrois+Gothic+SC&family=Imperial+Script&family=Josefin+Sans:ital,wght@0,100..700;1,100..700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Poppins:ital,wght@0,100;0,300;0,400;0,700;1,700&family=Red+Rose:wght@300..700&display=swap" 
-          rel="stylesheet" 
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
         />
-        <link href="https://fonts.googleapis.com/css2?family=Overlock+SC&display=swap" rel="stylesheet" />
+
+        <link
+          href="https://fonts.googleapis.com/css2?family=Carrois+Gothic+SC&family=Imperial+Script&family=Josefin+Sans:ital,wght@0,100..700;1,100..700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Poppins:ital,wght@0,100;0,300;0,400;0,700;1,700&family=Red+Rose:wght@300..700&family=Poor+Story&display=swap"
+          rel="stylesheet"
+        />
+
+        <link
+          href="https://fonts.googleapis.com/css2?family=Overlock+SC&display=swap"
+          rel="stylesheet"
+        />
       </head>
+
       <body className="antialiased">
         {children}
       </body>

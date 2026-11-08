@@ -10,7 +10,6 @@ export default function AdminLogin() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Ganti password sesuai keinginan kamu di sini
     if (password === 'ayammalang123') {
       router.push('/admin/dashboard');
     } else {

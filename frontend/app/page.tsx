@@ -179,9 +179,12 @@
 // }
 
 // app/page.js
+
+
 'use client';
 
 import React, { useState } from 'react';
+
 import Navbar from './Navbar/page';
 import HeroSection from './Hero/page';
 import ProjectSection from './Project/page';
@@ -191,39 +194,69 @@ import SertifikatSection from './sertifikat/page';
 import ContactSection from './Contact/page';
 import Footer from './Footer/page';
 
+import ScrollReveal from './components/ScrollReveal';
+
 export default function Home() {
-  const [selectedCert, setSelectedCert] = useState(null);
+  const [selectedCert, setSelectedCert] = useState<any>(null);
 
   return (
     <main className="min-h-screen w-full bg-white text-black overflow-x-hidden relative">
-      
-      {/* BACKGROUND GLOBAL & BLUR UTAMA DI HALAMAN BERANDA */}
+
+      {/* BACKGROUND */}
       <div className="absolute inset-0 -z-20 pointer-events-none overflow-hidden">
         <div className="absolute top-1/4 -left-32 w-[550px] h-[700px] opacity-80 bg-radial-gradient" />
+
         <div className="absolute top-2/3 -right-32 w-[550px] h-[700px] opacity-80 bg-radial-gradient" />
       </div>
 
-      {/* NAVBAR FIXED */}
+      {/* NAVBAR TETAP FIXED */}
       <div className="fixed top-0 left-0 w-full z-50">
         <Navbar />
       </div>
 
-      {/* SEMUA SECTION BERANDA */}
-      <HeroSection />
-      <ProjectSection />
-      <TestimoniSection />
-      <SkillSection />
-      <SertifikatSection onOpenModal={(cert) => setSelectedCert(cert)} />
-      <ContactSection />
+      {/* HERO */}
+      <ScrollReveal>
+        <HeroSection />
+      </ScrollReveal>
+
+      {/* PROJECT */}
+      <ScrollReveal>
+        <ProjectSection />
+      </ScrollReveal>
+
+      {/* TESTIMONI */}
+      <ScrollReveal>
+        <TestimoniSection />
+      </ScrollReveal>
+
+      {/* SKILL */}
+      <ScrollReveal>
+        <SkillSection />
+      </ScrollReveal>
+
+      {/* SERTIFIKAT */}
+      <ScrollReveal>
+        <SertifikatSection
+          onOpenModal={(cert: any) => setSelectedCert(cert)}
+        />
+      </ScrollReveal>
+
+      {/* CONTACT */}
+      <ScrollReveal>
+        <ContactSection />
+      </ScrollReveal>
+
+      {/* FOOTER TANPA ANIMASI */}
       <Footer />
 
-      {/* GLOBAL MODAL POPUP SERTIFIKAT */}
+      {/* MODAL POPUP SERTIFIKAT */}
       {selectedCert && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+
           <div className="relative w-full max-w-lg bg-[#EBF400] border-4 border-black rounded-[30px] p-8 shadow-2xl flex flex-col items-center text-center animate-in fade-in zoom-in duration-200">
-            
-            {/* Tombol Silang (X) di luar sudut kanan atas kotak */}
-            <button 
+
+            {/* TOMBOL CLOSE */}
+            <button
               onClick={() => setSelectedCert(null)}
               className="absolute -top-4 -right-4 w-12 h-12 bg-white hover:bg-red-500 hover:text-white border-2 border-black rounded-full flex items-center justify-center text-black font-bold shadow-lg transition-all z-50 cursor-pointer"
             >
@@ -233,21 +266,28 @@ export default function Home() {
             <h3 className="text-2xl sm:text-3xl font-black text-black mb-4 font-['Red_Rose']">
               {selectedCert.title}
             </h3>
+
             <p className="text-sm sm:text-base text-black/80 font-sans mb-6">
               {selectedCert.desc}
             </p>
+
             <div className="w-full h-48 bg-white/50 border border-black/30 rounded-[20px] flex items-center justify-center mb-6">
-              <span className="text-sm font-mono text-black/60">[ Preview Sertifikat ]</span>
+              <span className="text-sm font-mono text-black/60">
+                [ Preview Sertifikat ]
+              </span>
             </div>
-            <button 
+
+            <button
               onClick={() => setSelectedCert(null)}
-              className="px-8 py-2.5 bg-black text-white font-bold rounded-full hover:bg-black/80 transition shadow-sm text-sm"
+              className="px-8 py-2.5 bg-black text-white rounded-full font-bold hover:bg-black/80 transition-all"
             >
               Tutup
             </button>
+
           </div>
         </div>
       )}
+
     </main>
   );
 }

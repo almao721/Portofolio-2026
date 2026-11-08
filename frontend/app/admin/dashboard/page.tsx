@@ -112,8 +112,7 @@ export default function AdminDashboard() {
       <aside className="w-64 bg-[#4A0023] text-white hidden md:flex flex-col justify-between p-6">
         <div>
           <div className="flex items-center gap-2 mb-10">
-            <span className="text-2xl">🍗</span>
-            <h1 className="font-bold text-lg tracking-wider">ADMIN PANEL</h1>
+            <h1 className="font-extrabold text-lg tracking-wider justify-center text-center pl-5">Welcome,Alma!</h1>
           </div>
 
           <nav className="flex flex-col gap-2 font-mono text-sm">
@@ -146,22 +145,21 @@ export default function AdminDashboard() {
 
         <Link 
           href="/"
-          className="flex items-center gap-3 px-4 py-3 rounded-xl text-pink-200 hover:bg-red-500/20 hover:text-red-300 transition font-mono text-sm"
+          className="flex text-center justify-center items-center gap-3 px-4 py-3 rounded-xl text-pink-200 bg-red-500/40 hover:bg-red-200/20 hover:text-red-200 transition font-mono text-sm"
         >
-          <FaSignOutAlt /> Keluar Website
+          <FaSignOutAlt /> Keluar
         </Link>
       </aside>
 
-      <main className="flex-1 flex flex-col min-w-0 overflow-y-auto">
-        <header className="bg-white border-b border-gray-200 px-8 py-5 flex justify-between items-center shadow-sm">
+      <main className="flex-1 flex flex-col min-w-0 overflow-y-auto bg-gray-200">
+        <header className="bg-white border-b border-gray-300 px-20 py-8 flex justify-between items-center shadow-sm">
           <div>
-            <h2 className="text-xl font-bold capitalize">Dashboard / {activeTab}</h2>
-            <p className="text-xs text-gray-500 font-mono">Halo Alma, kelola konten portofoliomu di sini.</p>
+            <h2 className="text-3xl font-bold font-extrabold capitalize">Dashboard / {activeTab}</h2>
+            <p className="text-xs text-gray-500 font-mono">Halo Alma, kamu bisa kelola konten website portofolo mu disini!</p>
           </div>
         </header>
 
         <div className="p-8 max-w-5xl w-full mx-auto">
-          
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
             <div className="bg-white border border-gray-200 p-5 rounded-2xl shadow-sm flex items-center justify-between">
               <div>
