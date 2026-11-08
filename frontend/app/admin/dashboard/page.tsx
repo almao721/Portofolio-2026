@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
   FaBox, 
@@ -24,27 +24,39 @@ export default function AdminDashboard() {
   const [editId, setEditId] = useState<number | null>(null);
 
   const [title, setTitle] = useState('');
-  const [href, setHref] = useState('');
+  const [link, setLink] = useState('');
   const [imagePreview, setImagePreview] = useState('');
 
-  const [projects, setProjects] = useState([
-    { id: 1, title: 'Temu!n', href: 'https://temuin.com', image: '/Asset/project-temuin.png' },
-    { id: 2, title: 'About Martin', href: 'https://martin.com', image: '/Asset/project-martin.png' },
-  ]);
+  const [projects, setProjects] = useState<any[]>([]);
+  const [certificates, setCertificates] = useState<any[]>([]);
+  const [messages, setMessages] = useState<any[]>([]);
+  const [testimonials, setTestimonials] = useState<any[]>([]);
 
-  const [certificates, setCertificates] = useState([
-    { id: 1, title: 'Sertifikat Web Dev', image: '/Asset/cert1.png' },
-    { id: 2, title: 'Sertifikat Frontend', image: '/Asset/cert2.png' },
-  ]);
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-  const [messages, setMessages] = useState([
-    { id: 1, name: 'Andi Pratama', email: 'andi@gmail.com', phone: '08123456789', message: 'Halo Alma, ingin berdiskusi seputar pembuatan website sekolah.' },
-  ]);
+  const fetchData = async () => {
+    try {
+      const resProj = await fetch('http://localhost:5000/api/projects');
+      const dataProj = await resProj.json();
+      if (dataProj.success) setProjects(dataProj.data);
 
-  const [testimonials, setTestimonials] = useState([
-    { id: 1, name: 'Budi Santoso', message: 'Website portofolionya keren banget dan interaktif!', status: 'pending' },
-    { id: 2, name: 'Siti Rahma', message: 'Desainnya estetik, pertahankan ya!', status: 'approved' },
-  ]);
+      const resCert = await fetch('http://localhost:5000/api/certificates');
+      const dataCert = await resCert.json();
+      if (dataCert.success) setCertificates(dataCert.data);
+
+      const resMsg = await fetch('http://localhost:5000/api/messages');
+      const dataMsg = await resMsg.json();
+      if (dataMsg.success) setMessages(dataMsg.data);
+
+      const resTesti = await fetch('http://localhost:5000/api/testimonials');
+      const dataTesti = await resTesti.json();
+      if (dataTesti.success) setTestimonials(dataTesti.data);
+    } catch (err) {
+      console.error('Gagal mengambil data dari backend:', err);
+    }
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -61,49 +73,101 @@ export default function AdminDashboard() {
     if (item) {
       setEditId(item.id);
       setTitle(item.title);
-      setHref(item.href || '');
+      setLink(item.link || '');
       setImagePreview(item.image || '');
     } else {
       setEditId(null);
       setTitle('');
-      setHref('');
+      setLink('');
       setImagePreview('');
     }
     setIsModalOpen(true);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (activeTab === 'projects') {
-      if (editId) {
-        setProjects(projects.map(p => p.id === editId ? { ...p, title, href, image: imagePreview } : p));
+    const token = localStorage.getItem('admin_token');
+
+    const endpoint = activeTab === 'projects' ? 'projects' : 'certificates';
+    const bodyData = activeTab === 'projects' 
+      ? { title, link, image: imagePreview }
+      : { title, image: imagePreview };
+
+    const url = editId 
+      ? `http://localhost:5000/api/${endpoint}/${editId}`
+      : `http://localhost:5000/api/${endpoint}`;
+
+    const method = editId ? 'PUT' : 'POST';
+
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(bodyData)
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        fetchData(); 
+        setIsModalOpen(false);
       } else {
-        setProjects([...projects, { id: Date.now(), title, href, image: imagePreview }]);
+        alert(data.message || 'Gagal menyimpan data.');
       }
-    } else if (activeTab === 'certificates') {
-      if (editId) {
-        setCertificates(certificates.map(c => c.id === editId ? { ...c, title, image: imagePreview } : c));
-      } else {
-        setCertificates([...certificates, { id: Date.now(), title, image: imagePreview }]);
-      }
+    } catch (err) {
+      console.error('Gagal menyimpan data:', err);
+      alert('Gagal terhubung ke backend. Pastikan server Express aktif di port 5000.');
     }
-    setIsModalOpen(false);
   };
 
-  const handleDelete = (id: number) => {
-    if (activeTab === 'projects') {
-      setProjects(projects.filter(p => p.id !== id));
-    } else if (activeTab === 'certificates') {
-      setCertificates(certificates.filter(c => c.id !== id));
-    } else if (activeTab === 'messages') {
-      setMessages(messages.filter(m => m.id !== id));
-    } else if (activeTab === 'testimonials') {
-      setTestimonials(testimonials.filter(t => t.id !== id));
+  const handleDelete = async (id: number) => {
+    if (!confirm('Yakin ingin menghapus item ini?')) return;
+    const token = localStorage.getItem('admin_token');
+    const endpoint = activeTab;
+
+    try {
+      const res = await fetch(`http://localhost:5000/api/${endpoint}/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        fetchData();
+      } else {
+        alert(data.message);
+      }
+    } catch (err) {
+      console.error('Gagal menghapus data:', err);
     }
   };
 
-  const handleTestimonialStatus = (id: number, status: string) => {
-    setTestimonials(testimonials.map(t => t.id === id ? { ...t, status } : t));
+  const handleTestimonialStatus = async (id: number, status: string) => {
+    const token = localStorage.getItem('admin_token');
+
+    try {
+      const res = await fetch(`http://localhost:5000/api/testimonials/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ status })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        fetchData();
+      } else {
+        alert(data.message);
+      }
+    } catch (err) {
+      console.error('Gagal memperbarui status testimoni:', err);
+    }
   };
 
   return (
@@ -112,7 +176,7 @@ export default function AdminDashboard() {
       <aside className="w-64 bg-[#4A0023] text-white hidden md:flex flex-col justify-between p-6">
         <div>
           <div className="flex items-center gap-2 mb-10">
-            <h1 className="font-extrabold text-lg tracking-wider justify-center text-center pl-5">Welcome,Alma!</h1>
+            <h1 className="font-extrabold text-lg tracking-wider text-center pl-5">Welcome, Alma!</h1>
           </div>
 
           <nav className="flex flex-col gap-2 font-mono text-sm">
@@ -145,6 +209,7 @@ export default function AdminDashboard() {
 
         <Link 
           href="/"
+          onClick={() => localStorage.removeItem('admin_token')}
           className="flex text-center justify-center items-center gap-3 px-4 py-3 rounded-xl text-pink-200 bg-red-500/40 hover:bg-red-200/20 hover:text-red-200 transition font-mono text-sm"
         >
           <FaSignOutAlt /> Keluar
@@ -152,10 +217,10 @@ export default function AdminDashboard() {
       </aside>
 
       <main className="flex-1 flex flex-col min-w-0 overflow-y-auto bg-gray-200">
-        <header className="bg-white border-b border-gray-300 px-20 py-8 flex justify-between items-center shadow-sm">
+        <header className="bg-white border-b border-gray-300 px-10 md:px-20 py-8 flex justify-between items-center shadow-sm">
           <div>
-            <h2 className="text-3xl font-bold font-extrabold capitalize">Dashboard / {activeTab}</h2>
-            <p className="text-xs text-gray-500 font-mono">Halo Alma, kamu bisa kelola konten website portofolo mu disini!</p>
+            <h2 className="text-3xl font-extrabold capitalize">Dashboard / {activeTab}</h2>
+            <p className="text-xs text-gray-500 font-mono">Halo Alma, kamu bisa kelola konten website portofolomu disini!</p>
           </div>
         </header>
 
@@ -209,7 +274,7 @@ export default function AdminDashboard() {
                     <tr className="border-b border-gray-100 text-xs text-gray-400 font-mono">
                       <th className="py-3 px-4">Gambar</th>
                       <th className="py-3 px-4">Judul</th>
-                      {activeTab === 'projects' && <th className="py-3 px-4">Link Website (href)</th>}
+                      {activeTab === 'projects' && <th className="py-3 px-4">Link Website</th>}
                       <th className="py-3 px-4 text-right">Aksi</th>
                     </tr>
                   </thead>
@@ -228,9 +293,9 @@ export default function AdminDashboard() {
                         <td className="py-4 px-4 font-bold">{item.title}</td>
                         {activeTab === 'projects' && (
                           <td className="py-4 px-4 font-mono text-xs text-blue-600">
-                            {item.href ? (
-                              <a href={item.href} target="_blank" rel="noreferrer" className="flex items-center gap-1 hover:underline">
-                                {item.href} <FaExternalLinkAlt size={10} />
+                            {item.link ? (
+                              <a href={item.link} target="_blank" rel="noreferrer" className="flex items-center gap-1 hover:underline">
+                                {item.link} <FaExternalLinkAlt size={10} />
                               </a>
                             ) : (
                               <span className="text-gray-400">-</span>
@@ -381,12 +446,12 @@ export default function AdminDashboard() {
 
               {activeTab === 'projects' && (
                 <div>
-                  <label className="text-xs font-mono text-gray-500 mb-1 block">URL Link Website (href)</label>
+                  <label className="text-xs font-mono text-gray-500 mb-1 block">URL Link Website</label>
                   <input 
                     type="url" 
                     placeholder="https://contoh-website.com"
-                    value={href}
-                    onChange={(e) => setHref(e.target.value)}
+                    value={link}
+                    onChange={(e) => setLink(e.target.value)}
                     className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#E88D4D] font-mono text-xs"
                   />
                 </div>
